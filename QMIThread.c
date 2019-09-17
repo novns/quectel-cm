@@ -553,7 +553,7 @@ int requestSetEthMode(PROFILE_T *profile) {
         QmiThreadSendQMI(pRequest, &pResponse);
         if (pResponse) free(pResponse);
     }
-    
+
     pRequest = ComposeQMUXMsg(QMUX_TYPE_WDS, QMIWDS_SET_AUTO_CONNECT_REQ , WdsSetAutoConnect, (void *)&autoconnect_setting);
     QmiThreadSendQMI(pRequest, &pResponse);
     if (pResponse) free(pResponse);
@@ -1173,6 +1173,10 @@ int requestRegistrationState2(UCHAR *pPSAttachedState) {
     s_is_cdma = 0;
     s_hdr_personality = 0;
     while (remainingLen > 0) {
+        dbg_time("%s TLVType: 0x%x, TLVLength: %d, SrvStatus: 0x%x, IsPrefDataPath: 0x%x", __func__,
+            pServiceStatusInfo->TLVType, pServiceStatusInfo->TLVLength,
+            pServiceStatusInfo->SrvStatus, pServiceStatusInfo->IsPrefDataPath);
+
         switch (pServiceStatusInfo->TLVType) {
         case 0x10: // CDMA
             if (pServiceStatusInfo->SrvStatus == 0x02) {
@@ -1491,6 +1495,8 @@ int requestRegistrationState2(UCHAR *pPSAttachedState) {
             pDataCapStr = wwan_data_class2str(WWAN_DATA_CLASS_GPRS);
         }
     }
+
+    dbg_time("%s DeviceClass: 0x%x, DataCapList: 0x%lx", __func__, DeviceClass, DataCapList);
 
     dbg_time("%s MCC: %d, MNC: %d, PS: %s, DataCap: %s", __func__,
         MobileCountryCode, MobileNetworkCode, (*pPSAttachedState == 1) ? "Attached" : "Detached" , pDataCapStr);
@@ -1998,7 +2004,7 @@ int requestSetOperatingMode(UCHAR OperatingMode) {
     int err;
 
     dbg_time("%s(%d)", __func__, OperatingMode);
-    
+
     pRequest = ComposeQMUXMsg(QMUX_TYPE_DMS, QMIDMS_SET_OPERATING_MODE_REQ, DmsSetOperatingModeReq, &OperatingMode);
     err = QmiThreadSendQMI(pRequest, &pResponse);
 
